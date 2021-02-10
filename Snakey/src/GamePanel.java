@@ -36,6 +36,7 @@ public class GamePanel extends JPanel implements ActionListener {
 		this.setBackground(Color.black);
 		this.setFocusable(true);
 		this.addKeyListener(new MyKeyAdapter());
+
 		startGame();
 
 	}
@@ -79,9 +80,14 @@ public class GamePanel extends JPanel implements ActionListener {
 						g.getFont().getSize());
 
 			}
+
 		} else {
 			gameOver(g);
 		}
+	}
+
+	public void menu() {
+		running = false;
 	}
 
 	public void newApple() {
@@ -107,6 +113,7 @@ public class GamePanel extends JPanel implements ActionListener {
 		case 'R':
 			x[0] = x[0] + UNIT_SIZE;
 			break;
+
 		}
 	}
 
