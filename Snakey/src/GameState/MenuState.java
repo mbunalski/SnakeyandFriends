@@ -21,7 +21,7 @@ public class MenuState extends GameState {
 	private Font titleFont;
 	private Font font;
 
-	public MenuState(GameStateManager GSM) {
+	public MenuState(GameStateManager gsm) {
 		this.gsm = gsm;
 
 		try {
@@ -39,7 +39,6 @@ public class MenuState extends GameState {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -77,7 +76,7 @@ public class MenuState extends GameState {
 
 	private void select() {
 		if (currentChoice == 0) {
-			// start
+			gsm.setState(GameStateManager.SNAKE);
 		}
 		if (currentChoice == 1) {
 			// help

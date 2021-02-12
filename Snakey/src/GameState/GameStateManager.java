@@ -8,7 +8,7 @@ public class GameStateManager {
 	private int currentState;
 
 	public static final int MENUSTATE = 0;
-	public static final int LEVEL1STATE = 1;
+	public static final int SNAKE = 1;
 
 	public GameStateManager() {
 
@@ -16,6 +16,8 @@ public class GameStateManager {
 
 		currentState = MENUSTATE;
 		gameStates.add(new MenuState(this));
+		gameStates.add(new Snake(this));
+
 	}
 
 	public void setState(int state) {

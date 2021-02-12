@@ -1,21 +1,26 @@
 package GameState;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import javax.swing.Timer;
 
-public class Snake extends GameState {
+import Main.GamePanel;
 
-	static final int SCREEN_WIDTH = 600;
-	static final int SCREEN_HEIGHT = 600;
-	static final int UNIT_SIZE = 50;
+@SuppressWarnings("serial")
+public class Snake extends GameState implements ActionListener {
+
+	static final int SCREEN_WIDTH = 320;
+	static final int SCREEN_HEIGHT = 240;
+	static final int UNIT_SIZE = 10;
 	static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
 	static final int DELAY = 75;
 	final int x[] = new int[GAME_UNITS]; // hold coordinates of body parts
@@ -29,13 +34,23 @@ public class Snake extends GameState {
 	Timer timer;
 	Random random;
 
-	public Snake() {
+	public Snake(GameStateManager gsm) {
 		this.gsm = gsm;
+		random = new Random();
+
+		this.setPreferredSize(new Dimension(GamePanel.WIDTH, GamePanel.HEIGHT));
+		this.setBackground(Color.black);
+		this.setFocusable(true);
+
+		init();
 	}
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
+		newApple();
+		running = true;
+		timer = new Timer(DELAY, this);
+		timer.start();
 
 	}
 
@@ -54,12 +69,16 @@ public class Snake extends GameState {
 	@Override
 	public void draw(Graphics2D g) {
 		// TODO Auto-generated method stub
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
 		if (running) {
 			// makes a grid
-			for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
-				g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
-				g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
+			g.setColor(Color.white);
+			for (int i = 0; i < GamePanel.WIDTH / UNIT_SIZE; i++) {
+				g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, GamePanel.HEIGHT);
+				g.drawLine(0, i * UNIT_SIZE, GamePanel.WIDTH, i * UNIT_SIZE);
 			}
+
 			g.setColor(Color.red);
 			g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
@@ -74,14 +93,15 @@ public class Snake extends GameState {
 				g.setColor(Color.red);
 				g.setFont(new Font("Ink Free", Font.BOLD, 40));
 				FontMetrics metrics = getFontMetrics(g.getFont());
-				g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2,
-						g.getFont().getSize());
+				g.drawString("Score: " + applesEaten,
+						(GamePanel.WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
 
 			}
 
 		} else {
 			gameOver(g);
 		}
+
 	}
 
 	public void checkCollisions() {
@@ -96,7 +116,7 @@ public class Snake extends GameState {
 			running = false;
 		}
 		// checks if head touches right border
-		if (x[0] > SCREEN_WIDTH) {
+		if (x[0] > GamePanel.WIDTH) {
 			running = false;
 		}
 		// checks if head touches top border
@@ -104,7 +124,7 @@ public class Snake extends GameState {
 			running = false;
 		}
 		// checks if head touches bottom border
-		if (y[0] > SCREEN_HEIGHT) {
+		if (y[0] > GamePanel.HEIGHT) {
 			running = false;
 		}
 		if (!running) {
@@ -115,20 +135,20 @@ public class Snake extends GameState {
 	public void gameOver(Graphics g) {
 		// Game over Text
 		g.setColor(Color.red);
-		g.setFont(new Font("Ink Free", Font.BOLD, 75));
+		g.setFont(new Font("Ink Free", Font.BOLD, 25));
 		FontMetrics metrics1 = getFontMetrics(g.getFont());
-		g.drawString("Game Over", (SCREEN_WIDTH - metrics1.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+		g.drawString("Game Over", (GamePanel.WIDTH - metrics1.stringWidth("Game Over")) / 2, GamePanel.HEIGHT / 2);
 
 		g.setColor(Color.red);
-		g.setFont(new Font("Ink Free", Font.BOLD, 40));
+		g.setFont(new Font("Ink Free", Font.BOLD, 13));
 		FontMetrics metrics2 = getFontMetrics(g.getFont());
-		g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2,
+		g.drawString("Score: " + applesEaten, (GamePanel.WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2,
 				g.getFont().getSize());
 	}
 
 	public void newApple() {
-		appleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
-		appleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+		appleX = random.nextInt(GamePanel.WIDTH / UNIT_SIZE) * UNIT_SIZE;
+		appleY = random.nextInt(GamePanel.HEIGHT / UNIT_SIZE) * UNIT_SIZE;
 	}
 
 	public void move() {
@@ -162,12 +182,14 @@ public class Snake extends GameState {
 		}
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
 		if (running) {
 			move();
 			checkApple();
 			checkCollisions();
+
 		}
 		repaint();
 	}
