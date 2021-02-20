@@ -9,6 +9,8 @@ public class GameStateManager {
 
 	public static final int MENUSTATE = 0;
 	public static final int SNAKE = 1;
+	public static final int SNAKEGAMEOVER = 2;
+	public static final int HIGHSCORE = 3;
 
 	public GameStateManager() {
 
@@ -17,6 +19,20 @@ public class GameStateManager {
 		currentState = MENUSTATE;
 		gameStates.add(new MenuState(this));
 		gameStates.add(new Snake(this));
+		gameStates.add(new SnakeGameOver(this));
+		gameStates.add(new HighScore(this));
+
+	}
+
+	public GameStateManager(int state) {
+
+		gameStates = new ArrayList<GameState>();
+
+		currentState = state;
+		gameStates.add(new MenuState(this));
+		gameStates.add(new Snake(this));
+		gameStates.add(new SnakeGameOver(this));
+		gameStates.add(new HighScore(this));
 
 	}
 

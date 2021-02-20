@@ -9,8 +9,13 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.Random;
+import java.util.Scanner;
 
+import javax.swing.Action;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
 import Main.GamePanel;
@@ -18,21 +23,25 @@ import Main.GamePanel;
 @SuppressWarnings("serial")
 public class Snake extends GameState implements ActionListener {
 
-	static final int SCREEN_WIDTH = 320;
-	static final int SCREEN_HEIGHT = 240;
 	static final int UNIT_SIZE = 10;
-	static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
-	static final int DELAY = 75;
+	static final int GAME_UNITS = (GamePanel.WIDTH * GamePanel.HEIGHT) / UNIT_SIZE;
+	static final int DELAY = 125;
 	final int x[] = new int[GAME_UNITS]; // hold coordinates of body parts
 	final int y[] = new int[GAME_UNITS];
 	int bodyParts = 6;
-	int applesEaten = 0;
+	static int applesEaten = 0;
+	public static int finalScore;
 	int appleX;
 	int appleY;
 	char direction = 'R';
 	boolean running = false;
 	Timer timer;
 	Random random;
+
+	Action upAction;
+	Action downAction;
+	Action leftAction;
+	Action rightAction;
 
 	public Snake(GameStateManager gsm) {
 		this.gsm = gsm;
@@ -47,6 +56,9 @@ public class Snake extends GameState implements ActionListener {
 
 	@Override
 	public void init() {
+		direction = 'R';
+		appleX = 0;
+		appleY = 0;
 		newApple();
 		running = true;
 		timer = new Timer(DELAY, this);
@@ -56,7 +68,10 @@ public class Snake extends GameState implements ActionListener {
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		/*
+		 * direction = 'R'; appleX = 0; appleY = 0; newApple(); running = true; timer =
+		 * new Timer(DELAY, this); timer.start();
+		 */
 
 	}
 
@@ -69,16 +84,10 @@ public class Snake extends GameState implements ActionListener {
 	@Override
 	public void draw(Graphics2D g) {
 		// TODO Auto-generated method stub
+
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
 		if (running) {
-			// makes a grid
-			g.setColor(Color.white);
-			for (int i = 0; i < GamePanel.WIDTH / UNIT_SIZE; i++) {
-				g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, GamePanel.HEIGHT);
-				g.drawLine(0, i * UNIT_SIZE, GamePanel.WIDTH, i * UNIT_SIZE);
-			}
-
 			g.setColor(Color.red);
 			g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
@@ -91,7 +100,7 @@ public class Snake extends GameState implements ActionListener {
 					g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
 				}
 				g.setColor(Color.red);
-				g.setFont(new Font("Ink Free", Font.BOLD, 40));
+				g.setFont(new Font("Ink Free", Font.BOLD, 15));
 				FontMetrics metrics = getFontMetrics(g.getFont());
 				g.drawString("Score: " + applesEaten,
 						(GamePanel.WIDTH - metrics.stringWidth("Score: " + applesEaten)) / 2, g.getFont().getSize());
@@ -99,7 +108,67 @@ public class Snake extends GameState implements ActionListener {
 			}
 
 		} else {
-			gameOver(g);
+			finalScore = applesEaten;
+			applesEaten = 0;
+			for (int i = 0; i < bodyParts; i++) {
+				x[i] = 0;
+				y[i] = 0;
+			}
+			bodyParts = 6;
+			try {
+				File myFile = new File("C:\\Users\\Bun\\Desktop\\College\\HighScore.txt");
+				Scanner inputFile = new Scanner(myFile);
+				File myFile2 = new File("C:\\Users\\Bun\\Desktop\\College\\HighScoreNames.txt");
+				Scanner inputFile2 = new Scanner(myFile2);
+				int[] highscores = new int[10];
+				String[] highScoreNames = new String[10];
+				for (int i = 0; i < 10; i++) {
+					if (inputFile.hasNext()) {
+						highscores[i] = inputFile.nextInt();
+						highScoreNames[i] = inputFile2.nextLine();
+					} else {
+						break;
+					}
+				}
+
+				inputFile.close();
+				inputFile2.close();
+				String newHighScore = null;
+				for (int i = 0; i < highscores.length; i++) {
+					System.out.println(highscores[i]);
+				}
+				if (finalScore > highscores[9]) {
+					newHighScore = JOptionPane.showInputDialog("Enter your name");
+					PrintWriter outputFile = new PrintWriter("C:\\Users\\Bun\\Desktop\\College\\HighScore.txt");
+					PrintWriter outputFile2 = new PrintWriter("C:\\Users\\Bun\\Desktop\\College\\HighScoreNames.txt");
+					int j = 0;
+
+					for (int i = 0; i <= highscores.length; i++) {
+						if (highscores[i] < finalScore) {
+							outputFile.println(finalScore);
+							outputFile2.println(newHighScore);
+							j = i;
+							break;
+						} else {
+							outputFile.println(highscores[i]);
+							outputFile2.println(highScoreNames[i]);
+
+						}
+
+					}
+					for (int i = j; i < 9; i++) {
+						outputFile.println(highscores[i]);
+						outputFile2.println(highScoreNames[i]);
+
+					}
+					outputFile.close();
+					outputFile2.close();
+				}
+			} catch (Exception e) {
+
+			}
+
+			gsm.setState(GameStateManager.SNAKEGAMEOVER);
 		}
 
 	}
@@ -133,22 +202,16 @@ public class Snake extends GameState implements ActionListener {
 	}
 
 	public void gameOver(Graphics g) {
-		// Game over Text
-		g.setColor(Color.red);
-		g.setFont(new Font("Ink Free", Font.BOLD, 25));
-		FontMetrics metrics1 = getFontMetrics(g.getFont());
-		g.drawString("Game Over", (GamePanel.WIDTH - metrics1.stringWidth("Game Over")) / 2, GamePanel.HEIGHT / 2);
 
-		g.setColor(Color.red);
-		g.setFont(new Font("Ink Free", Font.BOLD, 13));
-		FontMetrics metrics2 = getFontMetrics(g.getFont());
-		g.drawString("Score: " + applesEaten, (GamePanel.WIDTH - metrics2.stringWidth("Score: " + applesEaten)) / 2,
-				g.getFont().getSize());
+		gsm.setState(GameStateManager.SNAKEGAMEOVER);
+
 	}
 
 	public void newApple() {
+
 		appleX = random.nextInt(GamePanel.WIDTH / UNIT_SIZE) * UNIT_SIZE;
 		appleY = random.nextInt(GamePanel.HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+
 	}
 
 	public void move() {
@@ -175,7 +238,8 @@ public class Snake extends GameState implements ActionListener {
 
 	public void checkApple() {
 		if (appleX == x[0] && appleY == y[0]) {
-			bodyParts++;
+
+			bodyParts = bodyParts + 3;
 			applesEaten++;
 			newApple();
 
@@ -196,6 +260,7 @@ public class Snake extends GameState implements ActionListener {
 
 	@Override
 	public void keyPressed(int k) {
+
 		switch (k) {
 		case KeyEvent.VK_LEFT:
 			if (direction != 'R') {
@@ -222,6 +287,7 @@ public class Snake extends GameState implements ActionListener {
 			break;
 
 		}
+
 	}
 
 	@Override
